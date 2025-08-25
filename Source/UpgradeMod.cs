@@ -19,8 +19,16 @@ namespace Vini.Upgrade
     [HarmonyPatch(typeof(XUiC_ItemStack))]
     public static class ItemStack_OnPress
     {
-        static MethodBase? TargetMethod() =>
-            AccessTools.Method(typeof(XUiC_ItemStack), "OnPress", new [] { typeof(string) });
+        static MethodInfo? _method;
+
+        // Skip patching on game versions where this overload no longer exists
+        static bool Prepare()
+        {
+            _method = AccessTools.Method(typeof(XUiC_ItemStack), "OnPress", new [] { typeof(string) });
+            return _method != null;
+        }
+
+        static MethodBase TargetMethod() => _method!;
 
         static bool Prefix(XUiC_ItemStack __instance, string _buttonName)
         {
@@ -54,8 +62,16 @@ namespace Vini.Upgrade
     [HarmonyPatch(typeof(XUiC_ItemStack))]
     public static class ItemStack_OnPress_New
     {
-        static MethodBase? TargetMethod() =>
-            AccessTools.Method(typeof(XUiC_ItemStack), "OnPress", new [] { typeof(XUiController), typeof(int) });
+        static MethodInfo? _method;
+
+        // Only apply patch when the new overload is present
+        static bool Prepare()
+        {
+            _method = AccessTools.Method(typeof(XUiC_ItemStack), "OnPress", new [] { typeof(XUiController), typeof(int) });
+            return _method != null;
+        }
+
+        static MethodBase TargetMethod() => _method!;
 
         static bool Prefix(XUiC_ItemStack __instance, XUiController _sender, int _mouseButton)
         {
