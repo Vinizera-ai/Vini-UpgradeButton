@@ -1,33 +1,57 @@
 <upgrade>
-  <!-- Regras por categoria; você pode criar blocos mais específicos (por item) se quiser -->
-  <rule group="weapons" maxQuality="6">
-    <!-- Custos base: consome 1 RepairKit + 5 Parts do tipo do item + 100 Dukes por nível -->
-    <cost>
-      <item name="resourceRepairKit" count="1"/>
-      <item name="@parts" count="5"/>      <!-- @parts = mapeado automaticamente pelo tipo -->
-      <dukes count="100"/>
-    </cost>
-    <quality step="+1"/>                   <!-- aumenta 1 nível -->
-  </rule>
+  <!-- Todas as FERRAMENTAS DE PEDRA (Stone tier / T0) -->
+  <rule group="tools_stone" maxQuality="6">
+    <!-- Opcional: limite a quais itens a regra se aplica -->
+    <match>
+      <item name="meleeToolRepairT0StoneAxe"/>     <!-- Stone Axe -->
+      <item name="meleeToolShovelT0StoneShovel"/>  <!-- Stone Shovel -->
+    </match>
 
-  <rule group="tools" maxQuality="6">
+    <!-- Custos por nível (ajuste à vontade) -->
     <cost>
       <item name="resourceRepairKit" count="1"/>
-      <item name="@parts" count="3"/>
-      <dukes count="50"/>
+      <item name="resourceSmallStone" count="20"/>
+      <dukes count="25"/>
     </cost>
+
+    <!-- Sobe 1 nível de qualidade por uso -->
     <quality step="+1"/>
   </rule>
 
-  <!-- Exemplo de “evolução de variante”: pedra -> ferro -> aço -->
+  <!-- Evolução de material: Pedra -> Ferro -> Aço -->
   <transform>
+    <!-- AXE: Stone -> Iron Fireaxe -> Steel Axe -->
     <path>
-      <from name="meleeToolStoneAxe" to="meleeToolIronFireAxe"/>
-      <cost><item name="resourceForgedIron" count="20"/></cost>
+      <from name="meleeToolRepairT0StoneAxe" to="meleeToolAxeT1IronFireaxe"/>
+      <cost>
+        <item name="resourceForgedIron" count="20"/>
+        <item name="resourceDuctTape" count="2"/>
+        <item name="resourceLeather" count="2"/>
+      </cost>
     </path>
     <path>
-      <from name="meleeToolIronFireAxe" to="meleeToolSteelAxe"/>
-      <cost><item name="resourceForgedSteel" count="30"/></cost>
+      <from name="meleeToolAxeT1IronFireaxe" to="meleeToolAxeT2SteelAxe"/>
+      <cost>
+        <item name="resourceForgedSteel" count="30"/>
+        <item name="resourceMechanicalParts" count="5"/>
+      </cost>
+    </path>
+
+    <!-- SHOVEL: Stone -> Iron Shovel -> Steel Shovel -->
+    <path>
+      <from name="meleeToolShovelT0StoneShovel" to="meleeToolShovelT1IronShovel"/>
+      <cost>
+        <item name="resourceForgedIron" count="15"/>
+        <item name="resourceDuctTape" count="2"/>
+        <item name="resourceLeather" count="2"/>
+      </cost>
+    </path>
+    <path>
+      <from name="meleeToolShovelT1IronShovel" to="meleeToolShovelT2SteelShovel"/>
+      <cost>
+        <item name="resourceForgedSteel" count="25"/>
+        <item name="resourceMechanicalParts" count="4"/>
+      </cost>
     </path>
   </transform>
 </upgrade>
