@@ -54,6 +54,10 @@ namespace Vini.Upgrade
             if (rule == null)
                 return false;
 
+            // Require that the player knows how to craft this item (gated by books/recipes)
+            if (!IsRecipeKnown(player, item.ItemClass))
+                return false;
+
             if (item.Quality >= rule.MaxQuality)
                 return false;
 
@@ -65,6 +69,21 @@ namespace Vini.Upgrade
             item.Quality = (ushort)newQ;
 
             return true;
+        }
+
+        private static bool IsRecipeKnown(EntityPlayerLocal player, ItemClass itemClass)
+        {
+            // Use reflection to support different game versions
+            var method = player.GetType().GetMethod("IsRecipeKnown", new[] { typeof(ItemClass) });
+            if (method != null)
+                return (bool)method.Invoke(player, new object[] { itemClass });
+
+            method = player.GetType().GetMethod("IsRecipeKnown", new[] { typeof(string) });
+            if (method != null)
+                return (bool)method.Invoke(player, new object[] { itemClass.Name });
+
+            // If the API is unavailable, treat as unknown recipe
+            return false;
         }
     }
 

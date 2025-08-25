@@ -1,10 +1,24 @@
 <upgrade>
-  <!-- Todas as FERRAMENTAS DE PEDRA (Stone tier / T0) -->
-  <rule group="tools_stone" maxQuality="6">
+  <!-- Regras gerais para todas as ferramentas -->
+  <rule group="tools" maxQuality="6">
     <!-- Opcional: limite a quais itens a regra se aplica -->
     <match>
       <item name="meleeToolRepairT0StoneAxe"/>     <!-- Stone Axe -->
+      <item name="meleeToolRepairT0TazasStoneAxe"/>
+      <item name="meleeToolRepairT1ClawHammer"/>
+      <item name="meleeToolRepairT3Nailgun"/>
+      <item name="meleeToolAxeT1IronFireaxe"/>
+      <item name="meleeToolAxeT2SteelAxe"/>
+      <item name="meleeToolPickT1IronPickaxe"/>
+      <item name="meleeToolPickT2SteelPickaxe"/>
       <item name="meleeToolShovelT0StoneShovel"/>  <!-- Stone Shovel -->
+      <item name="meleeToolShovelT1IronShovel"/>
+      <item name="meleeToolShovelT2SteelShovel"/>
+      <item name="meleeToolAxeT3Chainsaw"/>
+      <item name="meleeToolPickT3Auger"/>
+      <item name="meleeToolSalvageT1Wrench"/>
+      <item name="meleeToolSalvageT2Ratchet"/>
+      <item name="meleeToolSalvageT3ImpactDriver"/>
     </match>
 
     <!-- Custos por nível (ajuste à vontade) -->
