@@ -56,16 +56,30 @@ namespace Vini.Upgrade
         private static bool IsRecipeKnown(EntityPlayerLocal player, ItemClass itemClass)
         {
             // Use reflection to support different game versions
-            var method = player.GetType().GetMethod("IsRecipeKnown", new[] { typeof(ItemClass) });
-            if (method != null)
-                return (bool)method.Invoke(player, new object[] { itemClass });
+            var type = player.GetType();
+            var method = type.GetMethod("IsRecipeKnown", new[] { typeof(ItemClass) })
+                         ?? type.GetMethod("IsRecipeKnown", new[] { typeof(string) })
+                         ?? type.GetMethod("IsRecipeKnown", new[] { typeof(int) });
+            if (method == null)
+                return false;
 
-            method = player.GetType().GetMethod("IsRecipeKnown", new[] { typeof(string) });
-            if (method != null)
-                return (bool)method.Invoke(player, new object[] { itemClass.Name });
+            var param = method.GetParameters()[0].ParameterType;
+            object arg;
+            if (param == typeof(ItemClass))
+                arg = itemClass;
+            else if (param == typeof(string))
+                arg = itemClass.Name;
+            else if (param == typeof(int))
+            {
+                // Some versions expose the item id instead
+                var idField = itemClass.GetType().GetField("Id")
+                              ?? itemClass.GetType().GetField("id");
+                arg = idField != null ? (int)idField.GetValue(itemClass)! : 0;
+            }
+            else
+                return false;
 
-            // If the API is unavailable, treat as unknown recipe
-            return false;
+            return (bool)method.Invoke(player, new object[] { arg });
         }
 
         private static bool ConsumeCost(EntityPlayerLocal player, UpgradeCost cost)
@@ -76,37 +90,81 @@ namespace Vini.Upgrade
             var inventory = player.inventory;
             var invType = inventory.GetType();
 
-            // métodos comuns: GetItemCount(ItemClass,bool,int) e RemoveItems(ItemClass,int)
-            var getCount = invType.GetMethod("GetItemCount", new[] { typeof(ItemClass), typeof(bool), typeof(int) });
-            var remove = invType.GetMethod("RemoveItems", new[] { typeof(ItemClass), typeof(int) });
+            MethodInfo? getCount = null;
+            foreach (var m in invType.GetMethods())
+            {
+                if (m.Name != "GetItemCount") continue;
+                var ps = m.GetParameters();
+                if (ps.Length >= 1 &&
+                    (ps[0].ParameterType == typeof(ItemClass) || ps[0].ParameterType == typeof(ItemValue)))
+                {
+                    getCount = m;
+                    break;
+                }
+            }
+
+            MethodInfo? remove = null;
+            foreach (var m in invType.GetMethods())
+            {
+                if (m.Name != "RemoveItems" && m.Name != "RemoveItem") continue;
+                var ps = m.GetParameters();
+                if (ps.Length >= 2 &&
+                    (ps[0].ParameterType == typeof(ItemClass) || ps[0].ParameterType == typeof(ItemValue)))
+                {
+                    remove = m;
+                    break;
+                }
+            }
+
             if (getCount == null || remove == null)
                 return false;
 
-            foreach (var kvp in cost.Items)
+            object BuildArg(Type param, string name)
             {
-                var cls = ItemClass.GetItem(kvp.Key).ItemClass;
-                int have = (int)getCount.Invoke(inventory, new object[] { cls, false, -1 });
-                if (have < kvp.Value)
-                    return false;
+                return param == typeof(ItemValue)
+                    ? new ItemValue(ItemClass.GetItem(name).type)
+                    : (object)ItemClass.GetItem(name).ItemClass;
             }
-            if (cost.Dukes > 0)
+
+            int InvokeCount(string name)
             {
-                var dukesCls = ItemClass.GetItem("casinoCoin").ItemClass;
-                int have = (int)getCount.Invoke(inventory, new object[] { dukesCls, false, -1 });
-                if (have < cost.Dukes)
-                    return false;
+                var ps = getCount!.GetParameters();
+                var arg = BuildArg(ps[0].ParameterType, name);
+                object[] args = ps.Length switch
+                {
+                    1 => new object[] { arg },
+                    2 => new object[] { arg, false },
+                    _ => new object[] { arg, false, -1 }
+                };
+                return (int)getCount.Invoke(inventory, args);
+            }
+
+            void InvokeRemove(string name, int count)
+            {
+                var ps = remove!.GetParameters();
+                var arg = BuildArg(ps[0].ParameterType, name);
+                object[] args = ps.Length switch
+                {
+                    2 => new object[] { arg, count },
+                    3 => new object[] { arg, count, true },
+                    _ => new object[] { arg, count }
+                };
+                remove.Invoke(inventory, args);
             }
 
             foreach (var kvp in cost.Items)
             {
-                var cls = ItemClass.GetItem(kvp.Key).ItemClass;
-                remove.Invoke(inventory, new object[] { cls, kvp.Value });
+                if (InvokeCount(kvp.Key) < kvp.Value)
+                    return false;
             }
+            if (cost.Dukes > 0 && InvokeCount("casinoCoin") < cost.Dukes)
+                return false;
+
+            foreach (var kvp in cost.Items)
+                InvokeRemove(kvp.Key, kvp.Value);
+
             if (cost.Dukes > 0)
-            {
-                var dukesCls = ItemClass.GetItem("casinoCoin").ItemClass;
-                remove.Invoke(inventory, new object[] { dukesCls, cost.Dukes });
-            }
+                InvokeRemove("casinoCoin", cost.Dukes);
 
             return true;
         }
