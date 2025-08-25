@@ -50,6 +50,17 @@ namespace Vini.Upgrade
     {
         public static bool TryUpgrade(ItemValue item, EntityPlayerLocal player)
         {
+            // First check if the item should transform into another
+            var transform = UpgradeConfig.FindTransform(item.ItemClass.Name);
+            if (transform != null)
+            {
+                if (!ConsumeCost(player, transform.Cost))
+                    return false;
+
+                UpgradeConfig.ApplyTransform(item, transform.To);
+                return true;
+            }
+
             var rule = UpgradeConfig.FindRuleFor(item);
             if (rule == null)
                 return false;
@@ -61,7 +72,8 @@ namespace Vini.Upgrade
             if (item.Quality >= rule.MaxQuality)
                 return false;
 
-            // Consumo de materiais: TODO
+            if (!ConsumeCost(player, rule.Cost))
+                return false;
 
             // Quality é ushort → faça cast e clamp
             int newQ = item.Quality + rule.QualityStep;
@@ -85,16 +97,63 @@ namespace Vini.Upgrade
             // If the API is unavailable, treat as unknown recipe
             return false;
         }
+
+        private static bool ConsumeCost(EntityPlayerLocal player, UpgradeCost cost)
+        {
+            if (cost.Items.Count == 0 && cost.Dukes == 0)
+                return true;
+
+            var inventory = player.inventory;
+            var invType = inventory.GetType();
+
+            // métodos comuns: GetItemCount(ItemClass,bool,int) e RemoveItems(ItemClass,int)
+            var getCount = invType.GetMethod("GetItemCount", new[] { typeof(ItemClass), typeof(bool), typeof(int) });
+            var remove = invType.GetMethod("RemoveItems", new[] { typeof(ItemClass), typeof(int) });
+            if (getCount == null || remove == null)
+                return false;
+
+            foreach (var kvp in cost.Items)
+            {
+                var cls = ItemClass.GetItem(kvp.Key).ItemClass;
+                int have = (int)getCount.Invoke(inventory, new object[] { cls, false, -1 });
+                if (have < kvp.Value)
+                    return false;
+            }
+            if (cost.Dukes > 0)
+            {
+                var dukesCls = ItemClass.GetItem("casinoCoin").ItemClass;
+                int have = (int)getCount.Invoke(inventory, new object[] { dukesCls, false, -1 });
+                if (have < cost.Dukes)
+                    return false;
+            }
+
+            foreach (var kvp in cost.Items)
+            {
+                var cls = ItemClass.GetItem(kvp.Key).ItemClass;
+                remove.Invoke(inventory, new object[] { cls, kvp.Value });
+            }
+            if (cost.Dukes > 0)
+            {
+                var dukesCls = ItemClass.GetItem("casinoCoin").ItemClass;
+                remove.Invoke(inventory, new object[] { dukesCls, cost.Dukes });
+            }
+
+            return true;
+        }
     }
 
     public static class UpgradeConfig
     {
         // C# 8: escreva o tipo completo (evita CS8400)
         private static readonly Dictionary<string, UpgradeRule> Rules = new Dictionary<string, UpgradeRule>();
+        private static readonly Dictionary<string, UpgradeRule> ItemRules = new Dictionary<string, UpgradeRule>();
+        private static readonly Dictionary<string, TransformPath> Paths = new Dictionary<string, TransformPath>();
 
         public static void Load(Mod mod)
         {
             Rules.Clear();
+            ItemRules.Clear();
+            Paths.Clear();
             var path = Path.Combine(mod.Path, "Config/upgrade_rules.xml");
             if (!File.Exists(path))
                 return;
@@ -109,14 +168,76 @@ namespace Vini.Upgrade
                 var maxQuality = (int?)ruleNode.Attribute("maxQuality") ?? 6;
                 var step = (int?)ruleNode.Element("quality")?.Attribute("step") ?? 1;
 
-                Rules[group] = new UpgradeRule { Group = group, MaxQuality = maxQuality, QualityStep = step };
+                var rule = new UpgradeRule { Group = group, MaxQuality = maxQuality, QualityStep = step };
+
+                // match itens específicos
+                foreach (var match in ruleNode.Element("match")?.Elements("item") ?? Array.Empty<XElement>())
+                {
+                    var name = match.Attribute("name")?.Value;
+                    if (!string.IsNullOrEmpty(name))
+                    {
+                        rule.MatchItems.Add(name);
+                        ItemRules[name] = rule;
+                    }
+                }
+
+                // custos
+                var costNode = ruleNode.Element("cost");
+                if (costNode != null)
+                {
+                    foreach (var itemNode in costNode.Elements("item"))
+                    {
+                        var n = itemNode.Attribute("name")?.Value;
+                        var c = (int?)itemNode.Attribute("count") ?? 0;
+                        if (!string.IsNullOrEmpty(n) && c > 0)
+                            rule.Cost.Items[n] = c;
+                    }
+                    var dukesAttr = costNode.Element("dukes")?.Attribute("count");
+                    if (dukesAttr != null)
+                        rule.Cost.Dukes = (int)dukesAttr;
+                }
+
+                Rules[group] = rule;
+            }
+
+            // transform paths
+            foreach (var pathNode in doc.Root!.Element("transform")?.Elements("path") ?? Array.Empty<XElement>())
+            {
+                var fromNode = pathNode.Element("from");
+                if (fromNode == null)
+                    continue;
+
+                var from = fromNode.Attribute("name")?.Value;
+                var to = fromNode.Attribute("to")?.Value;
+                if (string.IsNullOrEmpty(from) || string.IsNullOrEmpty(to))
+                    continue;
+
+                var p = new TransformPath { From = from, To = to };
+                var costNode = pathNode.Element("cost");
+                if (costNode != null)
+                {
+                    foreach (var itemNode in costNode.Elements("item"))
+                    {
+                        var n = itemNode.Attribute("name")?.Value;
+                        var c = (int?)itemNode.Attribute("count") ?? 0;
+                        if (!string.IsNullOrEmpty(n) && c > 0)
+                            p.Cost.Items[n] = c;
+                    }
+                    var dukesAttr = costNode.Element("dukes")?.Attribute("count");
+                    if (dukesAttr != null)
+                        p.Cost.Dukes = (int)dukesAttr;
+                }
+                Paths[from] = p;
             }
         }
-
         public static UpgradeRule? FindRuleFor(ItemValue item)
         {
             if (item.ItemClass == null)
                 return null;
+
+            var name = item.ItemClass.Name;
+            if (ItemRules.TryGetValue(name, out var direct))
+                return direct;
 
             // FastTags não tem Contains(string) → fallback por string
             var tagStr = item.ItemClass.ItemTags.ToString(); // ex: "weapon,melee,iron"
@@ -130,6 +251,22 @@ namespace Vini.Upgrade
 
             return null;
         }
+
+        public static TransformPath? FindTransform(string itemName)
+        {
+            Paths.TryGetValue(itemName, out var p);
+            return p;
+        }
+
+        public static void ApplyTransform(ItemValue item, string toName)
+        {
+            var newItem = ItemClass.GetItem(toName);
+            var method = item.GetType().GetMethod("SetItemClass", new[] { typeof(ItemClass), typeof(int), typeof(bool) });
+            if (method != null)
+            {
+                method.Invoke(item, new object[] { newItem.ItemClass, item.Quality, true });
+            }
+        }
     }
 
     public class UpgradeRule
@@ -137,5 +274,20 @@ namespace Vini.Upgrade
         public string Group = string.Empty;
         public int MaxQuality;
         public int QualityStep = 1;
+        public UpgradeCost Cost = new UpgradeCost();
+        public HashSet<string> MatchItems = new HashSet<string>();
+    }
+
+    public class UpgradeCost
+    {
+        public readonly Dictionary<string, int> Items = new Dictionary<string, int>();
+        public int Dukes;
+    }
+
+    public class TransformPath
+    {
+        public string From = string.Empty;
+        public string To = string.Empty;
+        public UpgradeCost Cost = new UpgradeCost();
     }
 }
