@@ -78,39 +78,46 @@ namespace Vini.Upgrade
     {
         static void Postfix(XUiC_ItemInfoWindow __instance)
         {
-            var stackProp = __instance.GetType().GetProperty("ItemStack")
-                           ?? __instance.GetType().GetProperty("CurrentItemStack")
-                           ?? __instance.GetType().GetProperty("CurrentItem");
-            var stack = stackProp?.GetValue(__instance) as ItemStack;
-            if (stack == null || stack.IsEmpty())
-                return;
-            if (!UpgradeActions.IsEligibleForUpgrade(stack))
-                return;
-            var popupField = __instance.GetType().GetField(
-                    "currentPopupMenu",
-                    BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
-                ?? __instance.GetType().GetField(
-                    "popupMenu",
-                    BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-            var popup = popupField?.GetValue(__instance) as XUiC_PopupMenu;
-            if (popup != null)
+            try
             {
-                var addItem = popup.GetType()
-                    .GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
-                    .FirstOrDefault(m => m.Name == "AddItem" && m.GetParameters().Length >= 2);
-                if (addItem != null)
+                var stackProp = __instance.GetType().GetProperty("ItemStack")
+                               ?? __instance.GetType().GetProperty("CurrentItemStack")
+                               ?? __instance.GetType().GetProperty("CurrentItem");
+                var stack = stackProp?.GetValue(__instance) as ItemStack;
+                if (stack == null || stack.IsEmpty())
+                    return;
+                if (!UpgradeActions.IsEligibleForUpgrade(stack))
+                    return;
+                var popupField = __instance.GetType().GetField(
+                        "currentPopupMenu",
+                        BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+                    ?? __instance.GetType().GetField(
+                        "popupMenu",
+                        BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                var popup = popupField?.GetValue(__instance) as XUiC_PopupMenu;
+                if (popup != null)
                 {
-                    var parameters = addItem.GetParameters();
-                    var action = (Action)(() => UpgradeActions.TryOpenUpgradeUI(__instance, stack));
-                    object[] args = parameters.Length switch
+                    var addItem = popup.GetType()
+                        .GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+                        .FirstOrDefault(m => m.Name == "AddItem" && m.GetParameters().Length >= 2);
+                    if (addItem != null)
                     {
-                        2 => new object[] { "UPGRADE", action },
-                        3 => new object[] { "UPGRADE", action, parameters[2].ParameterType.IsValueType ? Activator.CreateInstance(parameters[2].ParameterType) : null },
-                        _ => Array.Empty<object>()
-                    };
-                    if (args.Length == parameters.Length)
-                        addItem.Invoke(popup, args);
+                        var parameters = addItem.GetParameters();
+                        var action = (Action)(() => UpgradeActions.TryOpenUpgradeUI(__instance, stack));
+                        object[] args = parameters.Length switch
+                        {
+                            2 => new object[] { "UPGRADE", action },
+                            3 => new object[] { "UPGRADE", action, parameters[2].ParameterType.IsValueType ? Activator.CreateInstance(parameters[2].ParameterType) : null },
+                            _ => Array.Empty<object>()
+                        };
+                        if (args.Length == parameters.Length)
+                            addItem.Invoke(popup, args);
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                Log.Out($"[Vini-Upgrade] Failed to add upgrade option: {ex.Message}");
             }
         }
     }
