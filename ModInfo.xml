@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xml>
-  <ModInfo>
-    <Name value="Vini-UpgradeButton"/>
-    <DisplayName value="UPGRADE Button for Items"/>
-    <Author value="Vinicius &amp; ChatGPT"/>
-    <Description value="Adiciona um botão UPGRADE ao lado de Modificar/Sucatear e aplica lógica de upgrade configurável."/>
-    <Version value="2.0.0"/>
-  </ModInfo>
-</xml>
+<mod>
+  <name>Vini-UpgradeButton</name>
+  <display_name>UPGRADE Button for Items</display_name>
+  <author>Vinicius &amp; ChatGPT</author>
+  <description>Adiciona um botão UPGRADE ao lado de Modificar/Sucatear e aplica lógica de upgrade configurável.</description>
+  <version>2.0.0</version>
+</mod>
