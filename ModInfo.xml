@@ -3,7 +3,7 @@
   <ModInfo>
     <Name value="Vini-UpgradeButton"/>
     <DisplayName value="UPGRADE Button for Items"/>
-    <Author value="Vinicius & ChatGPT"/>
+    <Author value="Vinicius &amp; ChatGPT"/>
     <Description value="Adiciona um botão UPGRADE ao lado de Modificar/Sucatear e aplica lógica de upgrade configurável."/>
     <Version value="2.0.0"/>
   </ModInfo>
