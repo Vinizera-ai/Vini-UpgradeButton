@@ -3,3 +3,6 @@ bin/
 obj/
 Source/bin/
 Source/obj/
+
+# Ignore built assembly
+Vini.Upgrade.dll
