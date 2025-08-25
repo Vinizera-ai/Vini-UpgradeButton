@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Xml.Linq;
 using HarmonyLib;
 
@@ -15,9 +16,12 @@ namespace Vini.Upgrade
         }
     }
 
-    [HarmonyPatch(typeof(XUiC_ItemStack), nameof(XUiC_ItemStack.OnPress))]
+    [HarmonyPatch(typeof(XUiC_ItemStack))]
     public static class ItemStack_OnPress
     {
+        static MethodBase? TargetMethod() =>
+            AccessTools.Method(typeof(XUiC_ItemStack), "OnPress", new [] { typeof(string) });
+
         static bool Prefix(XUiC_ItemStack __instance, string _buttonName)
         {
             if (_buttonName != "upgrade_item")
@@ -47,9 +51,12 @@ namespace Vini.Upgrade
     }
 
     // Support for game versions where OnPress no longer provides the command string
-    [HarmonyPatch(typeof(XUiC_ItemStack), "OnPress", new [] { typeof(XUiController), typeof(int) })]
+    [HarmonyPatch(typeof(XUiC_ItemStack))]
     public static class ItemStack_OnPress_New
     {
+        static MethodBase? TargetMethod() =>
+            AccessTools.Method(typeof(XUiC_ItemStack), "OnPress", new [] { typeof(XUiController), typeof(int) });
+
         static bool Prefix(XUiC_ItemStack __instance, XUiController _sender, int _mouseButton)
         {
             // Some versions pass the pressed button controller instead of a string
