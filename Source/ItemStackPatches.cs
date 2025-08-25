@@ -93,7 +93,25 @@ namespace Vini.Upgrade
                     "popupMenu",
                     BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
             var popup = popupField?.GetValue(__instance) as XUiC_PopupMenu;
-            popup?.AddItem("UPGRADE", () => UpgradeActions.TryOpenUpgradeUI(__instance, stack));
+            if (popup != null)
+            {
+                var addItem = popup.GetType()
+                    .GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+                    .FirstOrDefault(m => m.Name == "AddItem" && m.GetParameters().Length >= 2);
+                if (addItem != null)
+                {
+                    var parameters = addItem.GetParameters();
+                    var action = (Action)(() => UpgradeActions.TryOpenUpgradeUI(__instance, stack));
+                    object[] args = parameters.Length switch
+                    {
+                        2 => new object[] { "UPGRADE", action },
+                        3 => new object[] { "UPGRADE", action, parameters[2].ParameterType.IsValueType ? Activator.CreateInstance(parameters[2].ParameterType) : null },
+                        _ => Array.Empty<object>()
+                    };
+                    if (args.Length == parameters.Length)
+                        addItem.Invoke(popup, args);
+                }
+            }
         }
     }
 }
