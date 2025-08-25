@@ -6,7 +6,14 @@ namespace Vini.Upgrade
     {
         public static bool IsEligibleForUpgrade(ItemStack stack)
         {
-            return stack?.itemValue != null;
+            var item = stack?.itemValue;
+            if (item?.ItemClass == null)
+                return false;
+
+            if (UpgradeConfig.FindTransform(item.ItemClass.Name) != null)
+                return true;
+
+            return UpgradeConfig.FindRuleFor(item) != null;
         }
 
         public static void TryOpenUpgradeUI(XUiController? source, ItemStack stack)
