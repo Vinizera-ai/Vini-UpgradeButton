@@ -4,5 +4,5 @@
   <DisplayName value="UPGRADE Button for Items" />
   <Description value="Adiciona um botão UPGRADE ao lado de Modificar/Sucatear e aplica lógica de upgrade configurável." />
   <Author value="Vinizera-ai" />
-  <Version value="2.2" />
+  <Version value="2.2-b3" />
 </mod>

@@ -1,15 +1,28 @@
 // Substitui o patch no InfoWindow por este aqui 👇
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using HarmonyLib;
 
 namespace Vini.Upgrade
 {
-    // Hooka logo após o clique de "Inspecionar"
-    [HarmonyPatch(typeof(XUiC_ItemStack), nameof(XUiC_ItemStack.HandleItemInspect))]
+    // Hooka logo após o clique de "Inspecionar" (método varia entre versões)
+    [HarmonyPatch]
     public static class Patch_ItemStack_HandleItemInspect
     {
+        static IEnumerable<MethodBase> TargetMethods()
+        {
+            var type = typeof(XUiC_ItemStack);
+            // HandleItemInspect (A21) / HandleItemInfo (A22+)
+            var names = new[] { "HandleItemInspect", "HandleItemInfo" };
+            foreach (var n in names)
+            {
+                var m = AccessTools.Method(type, n);
+                if (m != null) yield return m;
+            }
+        }
+
         static void Postfix(XUiC_ItemStack __instance)
         
         { if (__instance == null) return;
