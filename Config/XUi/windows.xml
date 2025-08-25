@@ -1,14 +1,16 @@
 <configs>
   <!-- Inject upgrade button into item actions -->
   <append xpath="/windows/window[@name='itemInfoPanel']//grid[@name='itemActions']">
-    <button name="btnUpgrade" width="100" height="32" pos="0,0"
-            controller="XUiC_Button" pivot="TopLeft" visual_style="button">
-      <rect name="background" />
-      <label name="label" text_key="xuiUpgrade" justify="MiddleCenter" />
-      <!-- Action name for legacy versions; new versions detect the button id -->
-      <on_press value="upgrade_item"/>
-      <tooltip text_key="xuiUpgradeTip"/>
-    </button>
+    <rect name="upgradeAction" width="100" height="32" pivot="TopLeft" controller="XUiC_ItemAction">
+      <button name="btnUpgrade" width="100" height="32" pos="0,0"
+              controller="XUiC_Button" pivot="TopLeft" visual_style="button">
+        <rect name="background" />
+        <label name="label" text_key="xuiUpgrade" justify="MiddleCenter" />
+        <!-- Action name for legacy versions; new versions detect the button id -->
+        <on_press value="upgrade_item"/>
+        <tooltip text_key="xuiUpgradeTip"/>
+      </button>
+    </rect>
   </append>
 
 </configs>
