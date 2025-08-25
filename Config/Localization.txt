@@ -1,4 +1,4 @@
-Key,File,Type,UsedInMainMenu,NoTranslate,English,Portuguese(Brazil)
+Key,File,Type,UsedInMainMenu,NoTranslate,English,PortugueseBrazil
 xuiUpgrade,ui,Text,True,False,UPGRADE,UPGRADE
 xuiUpgradeTip,ui,Text,True,False,Upgrade this item using configured materials.,Aprimora este item usando os materiais configurados.
 xuiUpgradeOk,ui,Text,True,False,Item upgraded!,Item aprimorado!

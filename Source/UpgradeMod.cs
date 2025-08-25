@@ -46,6 +46,39 @@ namespace Vini.Upgrade
         }
     }
 
+    // Support for game versions where OnPress no longer provides the command string
+    [HarmonyPatch(typeof(XUiC_ItemStack), "OnPress", new [] { typeof(XUiController), typeof(int) })]
+    public static class ItemStack_OnPress_New
+    {
+        static bool Prefix(XUiC_ItemStack __instance, XUiController _sender, int _mouseButton)
+        {
+            // Some versions pass the pressed button controller instead of a string
+            var id = _sender?.Id ?? _sender?.name;
+            if (id != "btnUpgrade")
+                return true;
+
+            var stack = __instance.ItemStack;
+            if (stack == null || stack.itemValue == null)
+                return false;
+
+            var world = GameManager.Instance.World;
+            var player = world?.GetPrimaryPlayer() as EntityPlayerLocal;
+            if (player == null)
+                return false;
+
+            if (UpgradeLogic.TryUpgrade(stack.itemValue, player))
+            {
+                player.PlayOneShot("use_action");
+                GameManager.ShowTooltip(player, Localization.Get("xuiUpgradeOk"));
+            }
+            else
+            {
+                GameManager.ShowTooltip(player, Localization.Get("xuiUpgradeFail"));
+            }
+            return false;
+        }
+    }
+
     public static class UpgradeLogic
     {
         public static bool TryUpgrade(ItemValue item, EntityPlayerLocal player)
