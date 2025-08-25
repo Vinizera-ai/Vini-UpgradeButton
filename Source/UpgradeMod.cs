@@ -53,7 +53,16 @@ namespace Vini.Upgrade
         static bool Prefix(XUiC_ItemStack __instance, XUiController _sender, int _mouseButton)
         {
             // Some versions pass the pressed button controller instead of a string
-            var id = _sender?.Id ?? _sender?.name;
+            // Access the identifier via reflection to support multiple game versions
+            string? id = null;
+            if (_sender != null)
+            {
+                var t = _sender.GetType();
+                id = t.GetProperty("Id")?.GetValue(_sender) as string
+                     ?? t.GetField("Id")?.GetValue(_sender) as string
+                     ?? t.GetProperty("name")?.GetValue(_sender) as string
+                     ?? t.GetField("name")?.GetValue(_sender) as string;
+            }
             if (id != "btnUpgrade")
                 return true;
 
