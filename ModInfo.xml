@@ -5,6 +5,6 @@
     <DisplayName value="UPGRADE Button for Items"/>
     <Author value="Vinicius & ChatGPT"/>
     <Description value="Adiciona um botão UPGRADE ao lado de Modificar/Sucatear e aplica lógica de upgrade configurável."/>
-    <Version value="1.0.0"/>
+    <Version value="2.0.0"/>
   </ModInfo>
 </xml>
