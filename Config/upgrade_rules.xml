@@ -1,0 +1,33 @@
+<upgrade>
+  <!-- Regras por categoria; você pode criar blocos mais específicos (por item) se quiser -->
+  <rule group="weapons" maxQuality="6">
+    <!-- Custos base: consome 1 RepairKit + 5 Parts do tipo do item + 100 Dukes por nível -->
+    <cost>
+      <item name="resourceRepairKit" count="1"/>
+      <item name="@parts" count="5"/>      <!-- @parts = mapeado automaticamente pelo tipo -->
+      <dukes count="100"/>
+    </cost>
+    <quality step="+1"/>                   <!-- aumenta 1 nível -->
+  </rule>
+
+  <rule group="tools" maxQuality="6">
+    <cost>
+      <item name="resourceRepairKit" count="1"/>
+      <item name="@parts" count="3"/>
+      <dukes count="50"/>
+    </cost>
+    <quality step="+1"/>
+  </rule>
+
+  <!-- Exemplo de “evolução de variante”: pedra -> ferro -> aço -->
+  <transform>
+    <path>
+      <from name="meleeToolStoneAxe" to="meleeToolIronFireAxe"/>
+      <cost><item name="resourceForgedIron" count="20"/></cost>
+    </path>
+    <path>
+      <from name="meleeToolIronFireAxe" to="meleeToolSteelAxe"/>
+      <cost><item name="resourceForgedSteel" count="30"/></cost>
+    </path>
+  </transform>
+</upgrade>
