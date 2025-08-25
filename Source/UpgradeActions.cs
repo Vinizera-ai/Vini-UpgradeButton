@@ -9,8 +9,8 @@ namespace Vini.Upgrade
             return stack?.itemValue != null;
         }
 
-        public static void TryOpenUpgradeUI(XUiController source, ItemStack stack)
-        {
+        public static void TryOpenUpgradeUI(XUiController? source, ItemStack stack)
+        {   if (source == null) return;
             if (stack == null || stack.itemValue == null)
                 return;
             var world = GameManager.Instance.World;
