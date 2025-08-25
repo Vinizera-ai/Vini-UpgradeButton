@@ -1,0 +1,7 @@
+C:\Program Files (x86)\Steam\steamapps\common\7 Days To Die\Mods\Vini-Upgrade\Source\obj\Release\Vini.Upgrade.csproj.AssemblyReference.cache
+C:\Program Files (x86)\Steam\steamapps\common\7 Days To Die\Mods\Vini-Upgrade\Source\obj\Release\Vini.Upgrade.GeneratedMSBuildEditorConfig.editorconfig
+C:\Program Files (x86)\Steam\steamapps\common\7 Days To Die\Mods\Vini-Upgrade\Source\obj\Release\Vini.Upgrade.csproj.CoreCompileInputs.cache
+C:\Program Files (x86)\Steam\steamapps\common\7 Days To Die\Mods\Vini-Upgrade\Source\bin\Release\Vini.Upgrade.dll
+C:\Program Files (x86)\Steam\steamapps\common\7 Days To Die\Mods\Vini-Upgrade\Source\bin\Release\Vini.Upgrade.pdb
+C:\Program Files (x86)\Steam\steamapps\common\7 Days To Die\Mods\Vini-Upgrade\Source\obj\Release\Vini.Upgrade.dll
+C:\Program Files (x86)\Steam\steamapps\common\7 Days To Die\Mods\Vini-Upgrade\Source\obj\Release\Vini.Upgrade.pdb

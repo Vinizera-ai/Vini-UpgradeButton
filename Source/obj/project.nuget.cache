@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "JL0Zc6RSWyWjYrg/onoCDzeVixW6lXowx65MN5jWCMuewnt9rt4keSNVPAY3V+fLaDosg6DmkdEk0Gg2tI4sEw==",
+  "success": true,
+  "projectFilePath": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\7 Days To Die\\Mods\\Vini-Upgrade\\Source\\Vini.Upgrade.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\vinic\\.nuget\\packages\\microsoft.netframework.referenceassemblies\\1.0.3\\microsoft.netframework.referenceassemblies.1.0.3.nupkg.sha512",
+    "C:\\Users\\vinic\\.nuget\\packages\\microsoft.netframework.referenceassemblies.net48\\1.0.3\\microsoft.netframework.referenceassemblies.net48.1.0.3.nupkg.sha512"
+  ],
+  "logs": []
+}

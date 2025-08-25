@@ -1,0 +1,53 @@
+{
+  "format": 1,
+  "restore": {
+    "C:\\Program Files (x86)\\Steam\\steamapps\\common\\7 Days To Die\\Mods\\Vini-Upgrade\\Source\\Vini.Upgrade.csproj": {}
+  },
+  "projects": {
+    "C:\\Program Files (x86)\\Steam\\steamapps\\common\\7 Days To Die\\Mods\\Vini-Upgrade\\Source\\Vini.Upgrade.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\7 Days To Die\\Mods\\Vini-Upgrade\\Source\\Vini.Upgrade.csproj",
+        "projectName": "Vini.Upgrade",
+        "projectPath": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\7 Days To Die\\Mods\\Vini-Upgrade\\Source\\Vini.Upgrade.csproj",
+        "packagesPath": "C:\\Users\\vinic\\.nuget\\packages\\",
+        "outputPath": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\7 Days To Die\\Mods\\Vini-Upgrade\\Source\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\vinic\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net48"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net48": {
+            "targetAlias": "net48",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net48": {
+          "targetAlias": "net48",
+          "dependencies": {
+            "Microsoft.NETFramework.ReferenceAssemblies": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[1.0.3, )",
+              "autoReferenced": true
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.410\\RuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}
